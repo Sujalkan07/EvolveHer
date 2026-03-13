@@ -129,13 +129,18 @@
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
     @media (max-width: 768px) {
-      header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
-      nav { width: 100%; }
+      header { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 16px; padding: 16px; align-items: center; }
+      .logo { grid-column: 1; grid-row: 1; }
+      #authContainer { grid-column: 2; grid-row: 1; }
+      nav { grid-column: 1 / -1; grid-row: 2; width: calc(100% + 32px); margin-left: -16px; margin-right: -16px; padding: 0 16px 8px 16px; }
+      nav button { padding: 12px 16px; }
       main { margin: 24px auto; padding: 0 16px; }
       .grid-2 { grid-template-columns: 1fr; }
       .risk-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .risk-badge { width: 100%; }
       h1 { font-size: 32px; }
       p.subline { font-size: 16px; margin-bottom: 24px; }
+      textarea { min-height: 140px; }
       .actions-row { flex-direction: column; width: 100%; }
       .actions-row button { width: 100%; }
       .card { padding: 16px; }
@@ -402,7 +407,7 @@
     <!-- TAB 5: SETTINGS -->
     <div id="tab-settings" class="tab-content">
       <h1>Settings & About</h1>
-      <p class="subline">Learn how Feminary works to protect you.</p>
+      <p class="subline">Learn how EvolveHer works to protect you.</p>
       
       <div class="card" style="margin-top:24px;">
         <h3>Gemini API Key (Optional Override)</h3>
@@ -736,39 +741,39 @@
         
         const lawsMap = {
           "Stalking": { 
-            title: "Section 354D IPC (Indian Penal Code)", 
+            title: "Section 354D IPC & Section 67 IT Act", 
             desc: "Criminalizes physical and cyber stalking.",
-            fullText: "Any man who follows a woman and contacts, or attempts to contact such woman to foster personal interaction repeatedly despite a clear indication of disinterest by such woman, or monitors the use by a woman of the internet, email or any other form of electronic communication, commits the offence of stalking.\n\nPunishment: Imprisonment of either description for a term which may extend to three years, and shall also be liable to fine on first conviction. On a second or subsequent conviction, imprisonment which may extend to five years and a fine." 
+            fullText: "<strong>Section 354D IPC:</strong> Any man who follows a woman and contacts, or attempts to contact such woman to foster personal interaction repeatedly despite a clear indication of disinterest by such woman, or monitors the use by a woman of the internet, email or any other form of electronic communication, commits the offence of stalking.\n\n<strong>Punishment:</strong> Imprisonment of either description for a term which may extend to three years, and shall also be liable to fine on first conviction. On a second or subsequent conviction, imprisonment which may extend to five years and a fine." 
           },
           "Harassment": { 
             title: "Section 354A IPC & Section 67 IT Act", 
             desc: "Covers sexual harassment and transmitting obscene material.",
-            fullText: "Section 354A IPC: A man committing any of the following acts—physical contact and advances involving unwelcome and explicit sexual overtures; or demanding or requesting sexual favours; or showing pornography against the will of a woman; or making sexually coloured remarks, shall be guilty of the offence of sexual harassment.\nPunishment: Imprisonment up to 3 years, or fine, or both (for the first three clauses); up to 1 year, or fine, or both (for remarks).\n\nSection 67 IT Act: Publishes or transmits obscene material in electronic form.\nPunishment: Imprisonment up to 3 years and fine up to ₹5 Lakhs on first conviction." 
+            fullText: "<strong>Section 354A IPC:</strong> A man committing any of the following acts—physical contact and advances involving unwelcome and explicit sexual overtures; or demanding or requesting sexual favours; or showing pornography against the will of a woman; or making sexually coloured remarks, shall be guilty of the offence of sexual harassment.\n\n<strong>Punishment:</strong> Imprisonment up to 3 years, or fine, or both (for the first three clauses); up to 1 year, or fine, or both (for remarks).\n\n<strong>Section 67 IT Act:</strong> Publishes or transmits obscene material in electronic form.\n\n<strong>Punishment:</strong> Imprisonment up to 3 years and fine up to ₹5 Lakhs on first conviction. Second conviction may lead to 5 years imprisonment and ₹10 Lakhs fine." 
           },
           "Threat": { 
             title: "Section 503 & 506 IPC", 
             desc: "Criminal intimidation.",
-            fullText: "Section 503 IPC: Whoever threatens another with any injury to his person, reputation or property, or to the person or reputation of any one in whom that person is interested, with intent to cause alarm to that person, or to cause that person to do any act which he is not legally bound to do, or to omit to do any act which that person is legally entitled to do, as the means of avoiding the execution of such threat, commits criminal intimidation.\n\nPunishment (Section 506): Imprisonment of either description for a term which may extend to two years, or with fine, or with both. If threat be to cause death or grievous hurt, imprisonment which may extend to seven years, or with fine, or with both." 
+            fullText: "<strong>Section 503 IPC:</strong> Whoever threatens another with any injury to his person, reputation or property, or to the person or reputation of any one in whom that person is interested, with intent to cause alarm to that person, or to cause that person to do any act which he is not legally bound to do, or to omit to do any act which that person is legally entitled to do, as the means of avoiding the execution of such threat, commits criminal intimidation.\n\n<strong>Punishment (Section 506 IPC):</strong> Imprisonment of either description for a term which may extend to two years, or with fine, or with both. If threat be to cause death or grievous hurt, or to cause the destruction of any property by fire, or to cause an offence punishable with death or imprisonment for life, the punishment may extend to seven years, or with fine, or with both." 
           },
           "Financial Scam": { 
             title: "Section 419, 420 IPC & Section 66C, 66D IT Act", 
             desc: "Cheating, identity theft, and cheating by personation.",
-            fullText: "Section 420 IPC: Cheating and dishonestly inducing delivery of property. Punishable with imprisonment of either description for a term which may extend to seven years, and shall also be liable to fine.\n\nSection 66C IT Act: Identity theft. Whoever, fraudulently or dishonestly make use of the electronic signature, password or any other unique identification feature of any other person.\nPunishment: Imprisonment up to 3 years and fine up to ₹1 Lakh.\n\nSection 66D IT Act: Cheating by personation by using computer resource.\nPunishment: Imprisonment up to 3 years and fine up to ₹1 Lakh." 
+            fullText: "<strong>Section 420 IPC:</strong> Cheating and dishonestly inducing delivery of property. Punishable with imprisonment of either description for a term which may extend to seven years, and shall also be liable to fine.\n\n<strong>Section 66C IT Act (Identity Theft):</strong> Whoever, fraudulently or dishonestly make use of the electronic signature, password or any other unique identification feature of any other person.\n\n<strong>Punishment:</strong> Imprisonment of either description for a term which may extend to three years and shall also be liable to fine which may extend to ₹1 Lakh.\n\n<strong>Section 66D IT Act:</strong> Cheating by personation by using computer resource.\n\n<strong>Punishment:</strong> Imprisonment of either description for a term which may extend to three years and shall also be liable to fine which may extend to ₹1 Lakh." 
           },
           "Grooming": { 
-            title: "POCSO Act & Section 354D IPC", 
+            title: "POCSO Act 2012 & Section 354D IPC", 
             desc: "Protection of minors and stalking laws for adults.",
-            fullText: "If the victim is a minor (under 18), the Protection of Children from Sexual Offences (POCSO) Act, 2012 applies strictly. Section 11 defines sexual harassment of a child. Section 12 prescribes punishment of imprisonment up to 3 years and fine. The Act criminalizes sexual intent and grooming behaviors.\n\nFor adults, persistent unwanted attention falls under Stalking (354D IPC) or Outraging Modesty (354 IPC), punishable with up to 3 to 5 years of imprisonment." 
+            fullText: "<strong>POCSO Act (If victim is under 18):</strong> The Protection of Children from Sexual Offences Act, 2012 applies strictly. Section 11 defines sexual harassment of a child, including using digital media to expose children to sexual material or grooming them for sexual purposes.\n\n<strong>Punishment (Section 12):</strong> Imprisonment of either description for a term which may extend to three years and shall also be liable to fine.\n\n<strong>For Adults:</strong> Persistent unwanted attention, grooming, and manipulation fall under Stalking (354D IPC) or Outraging Modesty (354 IPC), punishable with 3 to 5 years of imprisonment." 
           },
           "Domestic Violence": { 
-            title: "PWDVA 2005", 
-            desc: "Protection of Women from Domestic Violence Act, 2005.",
-            fullText: "The Act covers emotional, verbal, sexual, and economic abuse by a partner or family member living in a shared household. It is a civil law that provides immediate emergency relief.\n\nReliefs available: Protection orders (stopping the abuser from contacting or approaching the victim), Residence orders (right to reside in the shared household), Monetary relief (maintenance, medical expenses), and Custody orders. Breach of a protection order is a cognizable and non-bailable offence punishable with imprisonment up to 1 year, or fine up to ₹20,000, or both." 
+            title: "PWDVA 2005 (Protection of Women from Domestic Violence Act)", 
+            desc: "Covers emotional, physical, sexual, and economic abuse.",
+            fullText: "<strong>Section 3 PWDVA 2005:</strong> Defines domestic violence to include actual abuse or the threat of abuse that is physical, sexual, verbal, emotional, or economic. This applies to any woman sharing a household with the abuser.\n\n<strong>Reliefs Available:</strong>\n- Protection Orders (Sec 18): Prohibiting the abuser from committing further violence or communicating with the victim.\n- Residence Orders (Sec 19): Right to reside in the shared household.\n- Monetary Relief (Sec 20): Maintenance and medical expenses.\n- Custody Orders (Sec 21).\n\n<strong>Punishment (Section 31):</strong> Breach of a protection order by the respondent is a cognizable and non-bailable offence punishable with imprisonment of either description for a term which may extend to one year, or with fine which may extend to ₹20,000, or with both." 
           },
           "Gaslighting": { 
-            title: "Section 498A IPC & General Criminal Intimidation", 
+            title: "Section 498A IPC & Section 503 IPC", 
             desc: "Cruelty by husband/relatives and emotional abuse.",
-            fullText: "Section 498A IPC: Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine. 'Cruelty' includes any willful conduct which is of such a nature as is likely to drive the woman to commit suicide or to cause grave injury or danger to life, limb or health (whether mental or physical).\n\nIn non-marital contexts, severe emotional abuse and gaslighting that causes alarm or forces a person to do something against their will can be grounds for Criminal Intimidation (Section 503 IPC)." 
+            fullText: "<strong>Section 498A IPC:</strong> Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine. 'Cruelty' includes any willful conduct which is of such a nature as is likely to drive the woman to commit suicide or to cause grave injury or danger to life, limb or health (whether mental or physical).\n\n<strong>Non-Marital Contexts:</strong> Severe emotional abuse, manipulation, and gaslighting that causes alarm or forces a person to do something against their will can be grounds for Criminal Intimidation (Section 503 IPC), punishable under Section 506 IPC with up to 2 years imprisonment." 
           }
         };
         
