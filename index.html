@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EvolveHer</title>
+  <style>
+    :root {
+      --bg: #FFF0F5;
+      --surface: rgba(255, 255, 255, 0.85);
+      --text-main: #4A0E4E;
+      --text-muted: #8B5A8C;
+      --primary: #E91E63;
+      --danger: #D32F2F;
+      --warning: #FBC02D;
+      --success: #388E3C;
+      --border: rgba(233, 30, 99, 0.15);
+      --shadow: 0 4px 24px rgba(233, 30, 99, 0.08);
+      --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      background: linear-gradient(135deg, #FFF0F5 0%, #FFF9C4 100%);
+      background-attachment: fixed;
+      color: var(--text-main);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .logo span { color: var(--primary); }
+    .badge { font-size: 12px; background: #f0f0f0; padding: 4px 8px; border-radius: 12px; color: var(--text-muted); font-weight: 600; }
+    nav { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    nav::-webkit-scrollbar { display: none; }
+    nav button {
+      background: none; border: none; font-size: 15px; font-weight: 500; color: var(--text-muted);
+      cursor: pointer; padding: 12px 0; position: relative; transition: color 0.3s var(--ease);
+      white-space: nowrap;
+    }
+    nav button:hover { color: var(--text-main); }
+    nav button.active { color: var(--text-main); }
+    nav button.active::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+      background: var(--primary); border-radius: 2px;
+    }
+    main { max-width: 900px; margin: 48px auto; padding: 0 24px; min-height: 80vh; }
+    .tab-content { display: none; animation: fadeUp 0.4s var(--ease) forwards; }
+    .tab-content.active { display: block; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; line-height: 1.1; }
+    p.subline { font-size: 20px; color: var(--text-muted); margin-bottom: 32px; }
+    textarea {
+      width: 100%; min-height: 180px; padding: 20px; border-radius: 18px;
+      border: 1px solid var(--border); background: var(--surface);
+      font-family: inherit; font-size: 17px; resize: vertical;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: all 0.3s var(--ease);
+      margin-bottom: 16px;
+    }
+    textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0,113,227,0.1); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .chip {
+      background: #f5f5f7; border: 1px solid var(--border); padding: 8px 16px;
+      border-radius: 980px; font-size: 14px; cursor: pointer; transition: all 0.3s var(--ease);
+    }
+    .chip:hover { transform: scale(1.03); box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: white; }
+    .chip.tactic { background: rgba(0,113,227,0.1); color: var(--primary); border: none; cursor: default; }
+    .chip.tactic:hover { transform: none; box-shadow: none; }
+    .btn-primary {
+      background: var(--primary); color: white; border: none; padding: 0 32px; height: 54px;
+      border-radius: 980px; font-size: 17px; font-weight: 600; cursor: pointer;
+      transition: all 0.3s var(--ease); display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-primary:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,113,227,0.3); }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary {
+      background: #f5f5f7; color: var(--text-main); border: 1px solid var(--border);
+      padding: 0 24px; height: 48px; border-radius: 980px; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: all 0.3s var(--ease); display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-secondary:hover { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    
+    .result-panel { margin-top: 48px; display: none; animation: slideUp 0.5s var(--ease) forwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
+      padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 10px rgba(233,30,99,0.04);
+      transition: box-shadow 0.3s var(--ease);
+      backdrop-filter: blur(10px);
+    }
+    .card:hover { box-shadow: var(--shadow); }
+    .card h3 { font-size: 20px; margin-bottom: 16px; }
+    
+    .risk-card { display: flex; align-items: center; gap: 24px; }
+    .risk-badge {
+      padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 18px; text-align: center;
+      min-width: 160px;
+    }
+    .risk-HIGH { background: #FFF2F2; color: var(--danger); border: 1px solid rgba(255,59,48,0.3); animation: pulse 2s infinite; }
+    .risk-MEDIUM { background: #FFF8F0; color: var(--warning); border: 1px solid rgba(255,149,0,0.3); }
+    .risk-LOW { background: #F0FFF4; color: var(--success); border: 1px solid rgba(52,199,89,0.3); }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,59,48,0.4); } 70% { box-shadow: 0 0 0 10px rgba(255,59,48,0); } 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0); } }
+    
+    .phrase-item { margin-bottom: 16px; padding-left: 16px; border-left: 3px solid var(--warning); }
+    .phrase-quote { font-weight: 600; color: var(--danger); margin-bottom: 4px; }
+    .phrase-reason { font-size: 15px; color: var(--text-muted); }
+    
+    .law-item { margin-bottom: 16px; }
+    .law-title { font-weight: 600; color: var(--primary); }
+    .law-desc { font-size: 15px; color: var(--text-muted); }
+    
+    .safety-list { list-style: none; }
+    .safety-list li { position: relative; padding-left: 28px; margin-bottom: 12px; font-size: 15px; }
+    .safety-list li::before { content: '✓'; position: absolute; left: 0; color: var(--success); font-weight: bold; }
+    
+    .actions-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 32px; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 768px) {
+      header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px; }
+      nav { width: 100%; }
+      main { margin: 24px auto; padding: 0 16px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .risk-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+      h1 { font-size: 32px; }
+      p.subline { font-size: 16px; margin-bottom: 24px; }
+      .actions-row { flex-direction: column; width: 100%; }
+      .actions-row button { width: 100%; }
+      .card { padding: 16px; }
+    }
+    
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      display: none; justify-content: center; align-items: center; z-index: 1000;
+      padding: 16px;
+    }
+    .modal-content {
+      background: white; border-radius: 24px; padding: 32px; max-width: 600px; width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: fadeUp 0.3s var(--ease);
+    }
+    .modal-content h2 { margin-bottom: 16px; color: var(--danger); }
+    .modal-content p { margin-bottom: 16px; color: var(--text-muted); }
+    .modal-content textarea { min-height: 120px; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 16px; justify-content: flex-end; }
+    @media (max-width: 768px) {
+      .modal-actions { flex-direction: column; }
+      .modal-actions button { width: 100%; }
+    }
+    
+    .log-item { display: flex; flex-direction: column; gap: 8px; }
+    .log-header { display: flex; justify-content: space-between; align-items: center; }
+    .log-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .dot-HIGH { background: var(--danger); }
+    .dot-MEDIUM { background: var(--warning); }
+    .dot-LOW { background: var(--success); }
+    .log-time { font-size: 13px; color: var(--text-muted); }
+    .log-text { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .settings-input {
+      width: 100%; padding: 16px; border-radius: 12px; border: 1px solid var(--border);
+      font-size: 17px; margin-bottom: 16px; font-family: monospace;
+    }
+    .alert { padding: 16px; border-radius: 12px; margin-bottom: 24px; display: none; }
+    .alert-error { background: #FFF2F2; color: var(--danger); border: 1px solid rgba(255,59,48,0.3); }
+    .alert-warning { background: #FFF8F0; color: var(--warning); border: 1px solid rgba(255,149,0,0.3); }
+    
+    .log-details { display: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 15px; }
+    .log-details.expanded { display: block; animation: fadeUp 0.3s var(--ease); }
+    .btn-text { background: none; border: none; color: var(--primary); font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 0; transition: opacity 0.2s; }
+    .btn-text:hover { opacity: 0.8; text-decoration: underline; }
+    
+    .shimmer {
+      position: relative; overflow: hidden;
+    }
+    .shimmer::after {
+      content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(90deg, rgba(255,255,255,0) 0, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 60%, rgba(255,255,255,0));
+      animation: shimmer 2s infinite;
+    }
+    @keyframes shimmer { 100% { transform: translateX(100%); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🌸 EvolveHer</div>
+    <nav id="mainNav">
+      <button class="active" onclick="switchTab('analyzer')">Analyzer</button>
+      <button onclick="switchTab('job')">Job Scanner</button>
+      <button onclick="switchTab('log')">Evidence Log</button>
+      <button onclick="switchTab('rights')">Rights</button>
+      <button onclick="switchTab('settings')">Settings</button>
+    </nav>
+    <div id="authContainer"></div>
+  </header>
+
+  <main>
+    <div id="apiError" class="alert alert-error"></div>
+
+    <!-- TAB 1: ANALYZER -->
+    <div id="tab-analyzer" class="tab-content active">
+      <h1>Is this message safe?</h1>
+      <p class="subline">Paste any chat, DM, or message. AI detects manipulation in seconds.</p>
+      
+      <textarea id="analyzerInput" placeholder="Paste conversation here..."></textarea>
+      
+      <div style="margin-bottom: 16px;">
+        <label for="analyzerImage" class="btn-secondary" style="display:inline-flex; align-items:center; gap:8px; cursor:pointer;">
+          📷 Attach Screenshot
+        </label>
+        <input type="file" id="analyzerImage" accept="image/*" style="display:none;" onchange="previewImage(event)">
+        <div id="imagePreviewContainer" style="display:none; margin-top:12px; position:relative; width:fit-content;">
+          <img id="imagePreview" style="max-height: 150px; border-radius: 8px; border: 1px solid var(--border);">
+          <button onclick="clearImage()" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; font-weight:bold;">×</button>
+        </div>
+      </div>
+      
+      <div class="chips">
+        <div class="chip" onclick="fillSample('analyzer', 'love')">Love Bombing</div>
+        <div class="chip" onclick="fillSample('analyzer', 'gaslight')">Gaslighting</div>
+        <div class="chip" onclick="fillSample('analyzer', 'groom')">Grooming</div>
+        <div class="chip" onclick="fillSample('analyzer', 'finance')">Financial Fraud</div>
+      </div>
+      
+      <button id="btnAnalyze" class="btn-primary" onclick="runAnalysis('analyzer')">Analyze Message</button>
+      
+      <div id="analyzerResult" class="result-panel">
+        <div class="card risk-card">
+          <div id="analyzerRiskBadge" class="risk-badge"></div>
+          <div>
+            <h3 style="margin-bottom:4px;">AI Assessment</h3>
+            <p id="analyzerSummary" style="color:var(--text-muted);"></p>
+          </div>
+        </div>
+        
+        <div class="grid-2">
+          <div class="card">
+            <h3>Manipulation Tactics Detected</h3>
+            <div id="analyzerTactics" class="chips" style="margin-bottom:0;"></div>
+          </div>
+          <div class="card">
+            <h3>Red Flag Phrases</h3>
+            <div id="analyzerPhrases"></div>
+          </div>
+          <div class="card" style="grid-column: 1 / -1;">
+            <h3>Your Rights Under Indian Law</h3>
+            <div id="analyzerLaws"></div>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-top: 24px; border-color: var(--primary); background: rgba(233, 30, 99, 0.02);">
+          <h3 style="color: var(--primary);">Recommended Next Steps</h3>
+          <ul id="analyzerAdvice" class="safety-list" style="font-size: 16px;">
+            <li>Screenshot evidence before blocking</li>
+            <li>Do not share OTPs, Aadhaar, or PAN</li>
+            <li>Block the sender immediately</li>
+            <li>Report at cybercrime.gov.in or call 1930</li>
+          </ul>
+        </div>
+        
+        <div class="actions-row">
+          <button class="btn-secondary" onclick="copyReport('analyzer')">Copy Report</button>
+          <button class="btn-secondary" onclick="saveEvidence('analyzer')">Save Evidence</button>
+          <button id="analyzerReportBtn" class="btn-primary" style="background:var(--danger); display:none;" onclick="openReportModal()">Report Abuse →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: JOB SCANNER -->
+    <div id="tab-job" class="tab-content">
+      <h1>Don't fall for fake jobs.</h1>
+      <p class="subline">Paste any job posting or recruiter message. AI checks if it's a scam.</p>
+      
+      <textarea id="jobInput" placeholder="Paste job description or message here..."></textarea>
+      
+      <div class="chips">
+        <div class="chip" onclick="fillSample('job', 'jobscam')">Fee Scam</div>
+        <div class="chip" onclick="fillSample('job', 'dataentry')">Data Entry Scam</div>
+        <div class="chip" onclick="fillSample('job', 'legit')">Legit Job</div>
+      </div>
+      
+      <button id="btnJobAnalyze" class="btn-primary" onclick="runAnalysis('job')">Scan for Scam</button>
+      
+      <div id="jobResult" class="result-panel">
+        <div class="card risk-card">
+          <div id="jobRiskBadge" class="risk-badge"></div>
+          <div style="flex:1;">
+            <h3 style="margin-bottom:4px;">Legitimacy Score</h3>
+            <div style="height:8px; background:#f0f0f0; border-radius:4px; overflow:hidden; margin-bottom:8px;">
+              <div id="jobScoreBar" style="height:100%; background:var(--primary); width:0%; transition:width 1s var(--ease);"></div>
+            </div>
+            <p id="jobSummary" style="color:var(--text-muted); font-size:14px;"></p>
+          </div>
+        </div>
+        
+        <div class="grid-2">
+          <div class="card">
+            <h3>Red Flags Found</h3>
+            <div id="jobTactics" class="chips" style="margin-bottom:0;"></div>
+          </div>
+          <div class="card">
+            <h3>Suspicious Phrases</h3>
+            <div id="jobPhrases"></div>
+          </div>
+          <div class="card" style="grid-column: 1 / -1;">
+            <h3>Recommended Next Steps</h3>
+            <ul id="jobAdvice" class="safety-list">
+              <li>Do not send any money</li>
+              <li>Do not share personal documents</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="actions-row">
+          <button class="btn-secondary" onclick="copyReport('job')">Copy Report</button>
+          <button class="btn-secondary" onclick="saveEvidence('job')">Save Evidence</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: EVIDENCE LOG -->
+    <div id="tab-log" class="tab-content">
+      <h1>Your Evidence Log</h1>
+      <p class="subline">All analyses saved locally on your device. Never uploaded anywhere.</p>
+      
+      <div class="actions-row" style="margin-top:0; margin-bottom:24px;">
+        <button class="btn-secondary" onclick="exportLog()">Export All as Text</button>
+        <button class="btn-secondary" onclick="clearLog()" style="color:var(--danger); border-color:rgba(255,59,48,0.3);">Clear All</button>
+      </div>
+      
+      <div id="logContainer">
+        <!-- Logs injected here -->
+      </div>
+    </div>
+
+    <!-- TAB 4: RIGHTS -->
+    <div id="tab-rights" class="tab-content">
+      <h1>Know Your Rights</h1>
+      <p class="subline">Legal protections and emergency contacts in India.</p>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Emergency Numbers</h3>
+          <ul class="safety-list" style="margin-top:16px;">
+            <li><strong>1930</strong> - National Cyber Crime</li>
+            <li><strong>181</strong> - Women Helpline</li>
+            <li><strong>100 / 112</strong> - Police Emergency</li>
+            <li><strong>7827170170</strong> - NCW WhatsApp</li>
+            <li><strong>9152987821</strong> - iCall Psychosocial Helpline</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Online Harassment</h3>
+          <div class="law-item">
+            <div class="law-title">Section 354D IPC</div>
+            <div class="law-desc">Stalking, including cyberstalking and monitoring online activity.</div>
+          </div>
+          <div class="law-item">
+            <div class="law-title">Section 66E IT Act</div>
+            <div class="law-desc">Violation of privacy (capturing/publishing private images).</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Financial & Job Scams</h3>
+          <div class="law-item">
+            <div class="law-title">Section 66C & 66D IT Act</div>
+            <div class="law-desc">Identity theft and cheating by personation using computer resource.</div>
+          </div>
+          <div class="law-item">
+            <div class="law-title">Section 420 IPC</div>
+            <div class="law-desc">Cheating and dishonestly inducing delivery of property.</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Domestic & Emotional Abuse</h3>
+          <div class="law-item">
+            <div class="law-title">Section 498A IPC</div>
+            <div class="law-desc">Cruelty by husband or relatives (includes mental cruelty).</div>
+          </div>
+          <div class="law-item">
+            <div class="law-title">PWDVA 2005</div>
+            <div class="law-desc">Protection of Women from Domestic Violence Act (covers emotional/economic abuse).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: SETTINGS -->
+    <div id="tab-settings" class="tab-content">
+      <h1>Settings & About</h1>
+      <p class="subline">Learn how Feminary works to protect you.</p>
+      
+      <div class="card" style="margin-top:24px;">
+        <h3>Gemini API Key (Optional Override)</h3>
+        <p style="color:var(--text-muted); margin-bottom:16px;">Use your own API key instead of the default platform key. Stored securely in your browser.</p>
+        <div style="display:flex; gap:8px; margin-bottom:16px; max-width: 500px;">
+          <input type="password" id="apiKeyInput" style="flex:1; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace;" placeholder="AIzaSy...">
+          <button class="btn-secondary" id="toggleKeyBtn" onclick="toggleApiKeyVisibility()">Show</button>
+        </div>
+        <button class="btn-primary" onclick="saveApiKey()">Save Key</button>
+        <span id="keySaveMsg" style="margin-left:16px; color:var(--success); display:none; font-weight:600;">✓ Saved!</span>
+      </div>
+
+      <div class="card" style="margin-top:24px;">
+        <h3>How it works</h3>
+        <div style="margin-top:16px; display:flex; flex-direction:column; gap:16px;">
+          <div><strong>1. Paste Text:</strong> Input any suspicious message, email, or job posting.</div>
+          <div><strong>2. AI Analysis:</strong> Advanced Gemini AI analyzes the text for psychological manipulation, coercion, and scam patterns.</div>
+          <div><strong>3. Get Protected:</strong> Receive a risk assessment, identified tactics, legal rights, and actionable safety advice.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px; text-align: center;">
+      <h2 style="color: var(--text-main);">Welcome to EvolveHer</h2>
+      <p>Sign in to securely save your evidence logs and settings.</p>
+      <input type="text" id="loginName" class="settings-input" placeholder="Enter your name" style="margin-bottom: 16px;">
+      <button class="btn-primary" style="width: 100%;" onclick="handleLogin()">Sign In</button>
+      <button class="btn-text" style="margin-top: 16px; color: var(--text-muted);" onclick="closeLoginModal()">Continue as Guest</button>
+    </div>
+  </div>
+
+  <div id="reportModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Report Abuse</h2>
+      <p>We have generated a report template based on the AI analysis. You can copy this text and paste it directly into the incident description on the National Cyber Crime Reporting Portal.</p>
+      <textarea id="reportTemplateText" readonly></textarea>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeReportModal()">Cancel</button>
+        <button class="btn-primary" onclick="copyAndGoToPortal()">Copy & Go to Portal</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { GoogleGenAI, Type } from '@google/genai';
+
+    // Initialize Gemini API using the platform-injected key
+    // We do NOT hardcode the user's key for security reasons.
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+    // --- STATE & INIT ---
+    let currentAnalysis = null;
+    let currentUser = localStorage.getItem('evolveher_user');
+
+    function updateAuthUI() {
+      const authContainer = document.getElementById('authContainer');
+      if (currentUser) {
+        authContainer.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-weight: 600; font-size: 14px; color: var(--text-main);">Hi, ${currentUser}</div>
+            <button class="btn-secondary" style="height: 32px; padding: 0 12px; font-size: 13px;" onclick="handleLogout()">Sign Out</button>
+          </div>
+        `;
+      } else {
+        authContainer.innerHTML = `
+          <button class="btn-secondary" style="height: 36px; padding: 0 16px; font-size: 14px;" onclick="openLoginModal()">Sign In</button>
+        `;
+      }
+    }
+
+    window.openLoginModal = function() {
+      document.getElementById('loginModal').style.display = 'flex';
+    };
+
+    window.closeLoginModal = function() {
+      document.getElementById('loginModal').style.display = 'none';
+    };
+
+    window.handleLogin = function() {
+      const name = document.getElementById('loginName').value.trim();
+      if (name) {
+        currentUser = name;
+        localStorage.setItem('evolveher_user', name);
+        updateAuthUI();
+        closeLoginModal();
+      }
+    };
+
+    window.handleLogout = function() {
+      currentUser = null;
+      localStorage.removeItem('evolveher_user');
+      updateAuthUI();
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAuthUI();
+      if (!currentUser) {
+        openLoginModal();
+      }
+      const key = localStorage.getItem('gemini_key');
+      if (key) {
+        const input = document.getElementById('apiKeyInput');
+        if (input) input.value = key;
+      }
+      renderLog();
+    });
+
+    // --- NAVIGATION ---
+    window.switchTab = function(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('#mainNav button').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('tab-' + tabId).classList.add('active');
+      event.target.classList.add('active');
+      
+      if(tabId === 'log') renderLog();
+    };
+
+    // --- SETTINGS ---
+    window.toggleApiKeyVisibility = function() {
+      const input = document.getElementById('apiKeyInput');
+      const btn = document.getElementById('toggleKeyBtn');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+      }
+    };
+
+    window.saveApiKey = function() {
+      const key = document.getElementById('apiKeyInput').value.trim();
+      if (confirm('Are you sure you want to save this API key? This will override the default system key.')) {
+        if (key) {
+          localStorage.setItem('gemini_key', key);
+        } else {
+          localStorage.removeItem('gemini_key');
+        }
+        const msg = document.getElementById('keySaveMsg');
+        msg.style.display = 'inline';
+        setTimeout(() => msg.style.display = 'none', 2000);
+      }
+    };
+
+    // --- SAMPLES ---
+    const samples = {
+      love: "You are literally the most perfect person I've ever met in my entire life. I've never felt this way about anyone before in 30 years. We were made for each other — I knew it the moment I saw you. I can already picture our future together, our home, our children. Can we meet tonight? I need you. You're the only one who understands me.",
+      gaslight: "You're being too sensitive again. I never said that — you always twist my words to make me look bad. You're imagining things, this is all in your head. Everyone I talk to agrees that you overreact to everything. Maybe you need professional help, you're clearly not mentally stable. I'm only saying this because I care about you.",
+      groom: "You're so mature for your age, so different from other girls your age. I feel like only you truly understand me, like we have a special connection no one else would get. Don't tell your parents about us talking — they won't understand our friendship. Can you send me a photo of yourself? Just for me.",
+      finance: "CONGRATULATIONS! You have been selected in our lucky draw and won ₹10,00,000! To claim your prize immediately, please share your Aadhaar number, PAN card, and your bank account OTP with our agent. This offer expires in 2 hours only. Call NOW: 98XXXXXXXX",
+      jobscam: "URGENT HIRING! Work from home data entry job. Earn ₹800-₹1200 per hour. No experience needed. No interview. Just register by paying ₹1500 registration fee and get your work kit delivered. 500 positions available. Offer closes today. WhatsApp ONLY: 9876543210. Genuine company, 100% guaranteed payment.",
+      dataentry: "We are looking for freelance typists. Convert image to text. Salary ₹40,000/month. Security deposit of ₹3000 required which is refundable after first salary. Legal agreement will be signed. If you fail to complete work, legal action will be taken.",
+      legit: "Hi, I'm reaching out from TechCorp. We saw your profile on LinkedIn and think you'd be a great fit for our Frontend Developer role. The position is full-time, remote, with a salary range of 12-15 LPA. Let me know if you're open to a quick introductory call next week. You can read more about the role here: [link]."
+    };
+
+    window.fillSample = function(type, sampleKey) {
+      const inputId = type === 'analyzer' ? 'analyzerInput' : 'jobInput';
+      document.getElementById(inputId).value = samples[sampleKey];
+    };
+
+    // --- AI INTEGRATION ---
+    let currentImageBase64 = null;
+    let currentImageMimeType = null;
+
+    window.previewImage = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64String = e.target.result.split(',')[1];
+        currentImageBase64 = base64String;
+        currentImageMimeType = file.type;
+        
+        document.getElementById('imagePreview').src = e.target.result;
+        document.getElementById('imagePreviewContainer').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.clearImage = function() {
+      document.getElementById('analyzerImage').value = '';
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+      document.getElementById('imagePreview').src = '';
+      currentImageBase64 = null;
+      currentImageMimeType = null;
+    };
+
+    window.runAnalysis = async function(type) {
+      const inputId = type === 'analyzer' ? 'analyzerInput' : 'jobInput';
+      const btnId = type === 'analyzer' ? 'btnAnalyze' : 'btnJobAnalyze';
+      const resultId = type === 'analyzer' ? 'analyzerResult' : 'jobResult';
+      
+      const text = document.getElementById(inputId).value.trim();
+      const errorEl = document.getElementById('apiError');
+      
+      errorEl.style.display = 'none';
+      document.getElementById(resultId).style.display = 'none';
+      
+      if (!text && !currentImageBase64) return;
+
+      const btn = document.getElementById(btnId);
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.classList.add('shimmer');
+      btn.textContent = "Analyzing with AI...";
+
+      try {
+        let imagePart = null;
+        if (type === 'analyzer' && currentImageBase64) {
+          imagePart = {
+            inlineData: {
+              data: currentImageBase64,
+              mimeType: currentImageMimeType
+            }
+          };
+        }
+        
+        const result = await analyzeWithGemini(text, type, imagePart);
+        const logText = text || (imagePart ? "[Screenshot Attached]" : "");
+        currentAnalysis = { type, text: logText, result, timestamp: new Date().toISOString(), imagePart };
+        displayResult(type, result);
+      } catch (err) {
+        console.error(err);
+        errorEl.textContent = "Analysis failed: " + err.message;
+        errorEl.style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('shimmer');
+        btn.textContent = originalText;
+      }
+    };
+
+    async function analyzeWithGemini(text, type, imagePart = null) {
+      const systemInstruction = type === "job" ? 
+        "You are a fraud detection AI. Analyze this job posting for scam indicators. Be highly vigilant. Any request for upfront money, unrealistic salaries for basic work, or asking for sensitive personal data upfront MUST be classified as HIGH risk. Provide clear, actionable next steps tailored to the detected risks." : 
+        "You are an expert psychological safety, cybersecurity, and threat assessment AI dedicated to protecting users from digital abuse. Analyze the provided text (and/or image) for manipulation, harassment, stalking, grooming, and financial scams. \n\nCRITICAL RISK SCORING RULES:\n1. HIGH RISK: Explicit or implicit threats, sexual harassment, stalking, severe coercion, blackmail, non-consensual intimate imagery (NCII) threats, or clear financial fraud/phishing.\n2. MEDIUM RISK: Unsolicited inappropriate comments, gaslighting, love bombing, subtle manipulation, boundary-pushing, or suspicious requests for personal information.\n3. LOW RISK: ONLY completely benign, respectful, and safe messages. NEVER classify harassment, stalking, or manipulation as LOW risk.\n\nYou MUST use the 'severity_explanation' field to provide a detailed justification for why you chose the specific risk level, focusing on the psychological, physical, or financial danger present. Ensure high-risk content is ALWAYS flagged appropriately. Finally, provide a clear, tailored 'Next Steps' array with actionable advice guiding the user on how to protect themselves based specifically on the detected risks (e.g., preserving evidence, blocking, reporting to authorities, seeking support).";
+
+      const responseSchema = type === "job" ? {
+        type: Type.OBJECT,
+        properties: {
+          risk: { type: Type.STRING, description: "HIGH, MEDIUM, or LOW" },
+          verdict: { type: Type.STRING, description: "SCAM, SUSPICIOUS, or LIKELY LEGITIMATE" },
+          legitimate_score: { type: Type.NUMBER, description: "0 to 100" },
+          summary: { type: Type.STRING, description: "one sentence summary" },
+          tactics: { type: Type.ARRAY, items: { type: Type.STRING }, description: "array of red flag types" },
+          highlights: { 
+            type: Type.ARRAY, 
+            items: { 
+              type: Type.OBJECT,
+              properties: {
+                phrase: { type: Type.STRING, description: "exact phrase" },
+                reason: { type: Type.STRING, description: "why suspicious" }
+              }
+            } 
+          },
+          next_steps: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-4 actionable steps the user should take immediately to protect themselves" }
+        },
+        required: ["risk", "verdict", "legitimate_score", "summary", "tactics", "highlights", "next_steps"]
+      } : {
+        type: Type.OBJECT,
+        properties: {
+          risk: { type: Type.STRING, description: "HIGH, MEDIUM, or LOW" },
+          summary: { type: Type.STRING, description: "one sentence summary" },
+          tactics: { type: Type.ARRAY, items: { type: Type.STRING }, description: "from: Love Bombing, Gaslighting, Emotional Blackmail, Grooming, Financial Scam, Isolation Attempt, Harassment, Threat, Stalking, Coercion, Safe" },
+          highlights: { 
+            type: Type.ARRAY, 
+            items: { 
+              type: Type.OBJECT,
+              properties: {
+                phrase: { type: Type.STRING, description: "exact phrase from text" },
+                reason: { type: Type.STRING, description: "why dangerous" }
+              }
+            } 
+          },
+          legal_categories: { type: Type.ARRAY, items: { type: Type.STRING }, description: "from: Stalking, Harassment, Threat, Financial Scam, Grooming, Domestic Violence, Gaslighting" },
+          severity_explanation: { type: Type.STRING, description: "2-3 sentences explaining danger level" },
+          next_steps: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-4 actionable steps the user should take immediately to protect themselves (e.g., Do not reply, Take screenshots, Block the sender, Report to cybercrime)" }
+        },
+        required: ["risk", "summary", "tactics", "highlights", "legal_categories", "severity_explanation", "next_steps"]
+      };
+
+      const storedKey = localStorage.getItem('gemini_key');
+      const activeAi = storedKey ? new GoogleGenAI({ apiKey: storedKey }) : ai;
+
+      let contents;
+      if (imagePart) {
+        contents = { parts: [imagePart, { text: text || "Analyze this image." }] };
+      } else {
+        contents = text;
+      }
+
+      const response = await activeAi.models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: contents,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.1,
+          responseMimeType: "application/json",
+          responseSchema: responseSchema
+        }
+      });
+      
+      return JSON.parse(response.text);
+    }
+
+    // --- DISPLAY RESULTS ---
+    function displayResult(type, data) {
+      if (type === 'analyzer') {
+        const badge = document.getElementById('analyzerRiskBadge');
+        badge.className = `risk-badge risk-${data.risk}`;
+        badge.textContent = `${data.risk} RISK`;
+        
+        document.getElementById('analyzerSummary').textContent = `${data.summary} ${data.severity_explanation || ''}`;
+        
+        const tacticsHtml = (data.tactics || []).map(t => `<div class="chip tactic">${t}</div>`).join('');
+        document.getElementById('analyzerTactics').innerHTML = tacticsHtml || 'None detected';
+        
+        const phrasesHtml = (data.highlights || []).map(h => `
+          <div class="phrase-item">
+            <div class="phrase-quote">"${h.phrase}"</div>
+            <div class="phrase-reason">${h.reason}</div>
+          </div>
+        `).join('');
+        document.getElementById('analyzerPhrases').innerHTML = phrasesHtml || 'No specific red flags identified.';
+        
+        const lawsMap = {
+          "Stalking": { 
+            title: "Section 354D IPC (Indian Penal Code)", 
+            desc: "Criminalizes physical and cyber stalking.",
+            fullText: "Any man who follows a woman and contacts, or attempts to contact such woman to foster personal interaction repeatedly despite a clear indication of disinterest by such woman, or monitors the use by a woman of the internet, email or any other form of electronic communication, commits the offence of stalking.\n\nPunishment: Imprisonment of either description for a term which may extend to three years, and shall also be liable to fine on first conviction. On a second or subsequent conviction, imprisonment which may extend to five years and a fine." 
+          },
+          "Harassment": { 
+            title: "Section 354A IPC & Section 67 IT Act", 
+            desc: "Covers sexual harassment and transmitting obscene material.",
+            fullText: "Section 354A IPC: A man committing any of the following acts—physical contact and advances involving unwelcome and explicit sexual overtures; or demanding or requesting sexual favours; or showing pornography against the will of a woman; or making sexually coloured remarks, shall be guilty of the offence of sexual harassment.\nPunishment: Imprisonment up to 3 years, or fine, or both (for the first three clauses); up to 1 year, or fine, or both (for remarks).\n\nSection 67 IT Act: Publishes or transmits obscene material in electronic form.\nPunishment: Imprisonment up to 3 years and fine up to ₹5 Lakhs on first conviction." 
+          },
+          "Threat": { 
+            title: "Section 503 & 506 IPC", 
+            desc: "Criminal intimidation.",
+            fullText: "Section 503 IPC: Whoever threatens another with any injury to his person, reputation or property, or to the person or reputation of any one in whom that person is interested, with intent to cause alarm to that person, or to cause that person to do any act which he is not legally bound to do, or to omit to do any act which that person is legally entitled to do, as the means of avoiding the execution of such threat, commits criminal intimidation.\n\nPunishment (Section 506): Imprisonment of either description for a term which may extend to two years, or with fine, or with both. If threat be to cause death or grievous hurt, imprisonment which may extend to seven years, or with fine, or with both." 
+          },
+          "Financial Scam": { 
+            title: "Section 419, 420 IPC & Section 66C, 66D IT Act", 
+            desc: "Cheating, identity theft, and cheating by personation.",
+            fullText: "Section 420 IPC: Cheating and dishonestly inducing delivery of property. Punishable with imprisonment of either description for a term which may extend to seven years, and shall also be liable to fine.\n\nSection 66C IT Act: Identity theft. Whoever, fraudulently or dishonestly make use of the electronic signature, password or any other unique identification feature of any other person.\nPunishment: Imprisonment up to 3 years and fine up to ₹1 Lakh.\n\nSection 66D IT Act: Cheating by personation by using computer resource.\nPunishment: Imprisonment up to 3 years and fine up to ₹1 Lakh." 
+          },
+          "Grooming": { 
+            title: "POCSO Act & Section 354D IPC", 
+            desc: "Protection of minors and stalking laws for adults.",
+            fullText: "If the victim is a minor (under 18), the Protection of Children from Sexual Offences (POCSO) Act, 2012 applies strictly. Section 11 defines sexual harassment of a child. Section 12 prescribes punishment of imprisonment up to 3 years and fine. The Act criminalizes sexual intent and grooming behaviors.\n\nFor adults, persistent unwanted attention falls under Stalking (354D IPC) or Outraging Modesty (354 IPC), punishable with up to 3 to 5 years of imprisonment." 
+          },
+          "Domestic Violence": { 
+            title: "PWDVA 2005", 
+            desc: "Protection of Women from Domestic Violence Act, 2005.",
+            fullText: "The Act covers emotional, verbal, sexual, and economic abuse by a partner or family member living in a shared household. It is a civil law that provides immediate emergency relief.\n\nReliefs available: Protection orders (stopping the abuser from contacting or approaching the victim), Residence orders (right to reside in the shared household), Monetary relief (maintenance, medical expenses), and Custody orders. Breach of a protection order is a cognizable and non-bailable offence punishable with imprisonment up to 1 year, or fine up to ₹20,000, or both." 
+          },
+          "Gaslighting": { 
+            title: "Section 498A IPC & General Criminal Intimidation", 
+            desc: "Cruelty by husband/relatives and emotional abuse.",
+            fullText: "Section 498A IPC: Whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine. 'Cruelty' includes any willful conduct which is of such a nature as is likely to drive the woman to commit suicide or to cause grave injury or danger to life, limb or health (whether mental or physical).\n\nIn non-marital contexts, severe emotional abuse and gaslighting that causes alarm or forces a person to do something against their will can be grounds for Criminal Intimidation (Section 503 IPC)." 
+          }
+        };
+        
+        const lawsHtml = (data.legal_categories || []).map(cat => {
+          const law = lawsMap[cat] || { title: cat, desc: "Relevant legal protection applies.", fullText: "Please consult a legal professional or visit cybercrime.gov.in for specific details regarding this category." };
+          return `
+            <div class="law-item">
+              <div class="law-title">${law.title}</div>
+              <div class="law-desc" style="font-weight: 500; margin-bottom: 8px;">${law.desc}</div>
+              <div class="law-fulltext" style="font-size: 13px; color: var(--text-muted); background: #F5F5F7; padding: 12px; border-radius: 8px; border-left: 3px solid var(--primary); white-space: pre-wrap; line-height: 1.5;">${law.fullText}</div>
+            </div>
+          `;
+        }).join('');
+        document.getElementById('analyzerLaws').innerHTML = lawsHtml || '<div class="law-item"><div class="law-title">General Protection</div><div class="law-desc">Report cybercrimes at cybercrime.gov.in</div></div>';
+        
+        const adviceHtml = (data.next_steps || []).map(step => `<li>${step}</li>`).join('');
+        document.getElementById('analyzerAdvice').innerHTML = adviceHtml || '<li>Screenshot evidence before blocking</li><li>Do not share OTPs, Aadhaar, or PAN</li><li>Block the sender immediately</li><li>Report at cybercrime.gov.in or call 1930</li>';
+        
+        const reportBtn = document.getElementById('analyzerReportBtn');
+        reportBtn.style.display = data.risk === 'HIGH' || data.risk === 'MEDIUM' ? 'inline-flex' : 'none';
+        
+        document.getElementById('analyzerResult').style.display = 'block';
+      } 
+      else if (type === 'job') {
+        const badge = document.getElementById('jobRiskBadge');
+        badge.className = `risk-badge risk-${data.risk}`;
+        badge.textContent = data.verdict;
+        
+        document.getElementById('jobSummary').textContent = data.summary;
+        
+        setTimeout(() => {
+          document.getElementById('jobScoreBar').style.width = `${data.legitimate_score || 0}%`;
+        }, 100);
+        
+        const tacticsHtml = (data.tactics || []).map(t => `<div class="chip tactic">${t}</div>`).join('');
+        document.getElementById('jobTactics').innerHTML = tacticsHtml || 'None detected';
+        
+        const phrasesHtml = (data.highlights || []).map(h => `
+          <div class="phrase-item">
+            <div class="phrase-quote">"${h.phrase}"</div>
+            <div class="phrase-reason">${h.reason}</div>
+          </div>
+        `).join('');
+        document.getElementById('jobPhrases').innerHTML = phrasesHtml || 'No specific red flags identified.';
+        
+        const adviceHtml = (data.next_steps || []).map(step => `<li>${step}</li>`).join('');
+        document.getElementById('jobAdvice').innerHTML = adviceHtml || '<li>Do not send any money</li><li>Do not share personal documents</li>';
+        
+        document.getElementById('jobResult').style.display = 'block';
+      }
+    }
+
+    // --- LOGGING & EXPORT ---
+    window.saveEvidence = function(type) {
+      if (!currentAnalysis) return;
+      let logs = JSON.parse(localStorage.getItem('feminary_logs') || '[]');
+      logs.unshift(currentAnalysis);
+      localStorage.setItem('feminary_logs', JSON.stringify(logs));
+      alert('Evidence saved to local log.');
+    };
+
+    function renderLog() {
+      const logs = JSON.parse(localStorage.getItem('feminary_logs') || '[]');
+      const container = document.getElementById('logContainer');
+      
+      if (logs.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:48px; color:var(--text-muted);">
+            <div style="font-size:48px; margin-bottom:16px;">🛡️</div>
+            <p>No evidence saved yet.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = logs.map((log, index) => `
+        <div class="card log-item">
+          <div class="log-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="log-dot dot-${log.result.risk}"></span>
+              <strong>${log.type === 'analyzer' ? 'Message Analysis' : 'Job Scan'}</strong>
+            </div>
+            <span class="log-time">${new Date(log.timestamp).toLocaleString()}</span>
+          </div>
+          <div class="log-text" style="margin-top:8px; font-style:italic; color:var(--text-muted);">"${log.text.substring(0, 120)}${log.text.length > 120 ? '...' : ''}"</div>
+          <div style="font-size:14px; font-weight:600; margin-top:8px; color:var(--text-main);">
+            Verdict: ${log.result.risk} RISK ${log.result.verdict ? `(${log.result.verdict})` : ''}
+          </div>
+          <button id="log-btn-${index}" class="btn-text" onclick="toggleLogDetails(${index})" style="margin-top:8px; text-align:left; width:fit-content;">View Full Details</button>
+          
+          <div id="log-details-${index}" class="log-details">
+            ${log.imagePart ? `<div style="margin-bottom:12px;"><strong>Attached Image:</strong><br/><img src="data:${log.imagePart.inlineData.mimeType};base64,${log.imagePart.inlineData.data}" style="max-height: 150px; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px;"></div>` : ''}
+            <div style="margin-bottom:12px;"><strong>Original Text:</strong><br/><span style="white-space:pre-wrap;">${log.text}</span></div>
+            <div style="margin-bottom:12px;"><strong>AI Summary:</strong><br/>${log.result.summary} ${log.result.severity_explanation || ''}</div>
+            <div style="margin-bottom:12px;"><strong>Tactics Detected:</strong><br/>${(log.result.tactics || []).join(', ') || 'None'}</div>
+            <div><strong>Red Flags:</strong><br/>
+              <ul style="padding-left:20px; margin-top:4px;">
+                ${(log.result.highlights || []).map(h => `<li>"${h.phrase}" - <span style="color:var(--text-muted)">${h.reason}</span></li>`).join('')}
+              </ul>
+            </div>
+            <div style="margin-top:12px;"><strong>Next Steps:</strong><br/>
+              <ul style="padding-left:20px; margin-top:4px;">
+                ${(log.result.next_steps || []).map(step => `<li>${step}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.toggleLogDetails = function(index) {
+      const el = document.getElementById(`log-details-${index}`);
+      const btn = document.getElementById(`log-btn-${index}`);
+      if (el.classList.contains('expanded')) {
+        el.classList.remove('expanded');
+        if (btn) btn.textContent = 'View Full Details';
+      } else {
+        el.classList.add('expanded');
+        if (btn) btn.textContent = 'Hide Details';
+      }
+    };
+
+    window.clearLog = function() {
+      if(confirm('Are you sure you want to clear all saved evidence? This cannot be undone.')) {
+        localStorage.removeItem('feminary_logs');
+        renderLog();
+      }
+    };
+
+    window.exportLog = function() {
+      const logs = localStorage.getItem('feminary_logs');
+      if (!logs || logs === '[]') {
+        alert('No evidence to export.');
+        return;
+      }
+      
+      const parsed = JSON.parse(logs);
+      let textContent = "EVOLVEHER - EVIDENCE LOG\n============================\n\n";
+      
+      parsed.forEach((log, i) => {
+        textContent += `ENTRY ${i+1}\n`;
+        textContent += `Date: ${new Date(log.timestamp).toLocaleString()}\n`;
+        textContent += `Type: ${log.type}\n`;
+        textContent += `Risk Level: ${log.result.risk}\n`;
+        textContent += `Original Text:\n"${log.text}"\n\n`;
+        textContent += `AI Summary: ${log.result.summary}\n`;
+        textContent += `Tactics Detected: ${(log.result.tactics || []).join(', ')}\n`;
+        textContent += `----------------------------\n\n`;
+      });
+      
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `EvolveHer_Evidence_${new Date().toISOString().split('T')[0]}.txt`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    window.openReportModal = function() {
+      if (!currentAnalysis || !currentAnalysis.result) return;
+      
+      const data = currentAnalysis.result;
+      const originalText = currentAnalysis.text;
+      
+      const template = `INCIDENT REPORT
+Date: ${new Date().toLocaleDateString()}
+Risk Level: ${data.risk}
+Detected Tactics: ${(data.tactics || []).join(', ')}
+
+INCIDENT DESCRIPTION:
+I am reporting an incident involving suspicious/malicious communication. The AI analysis flagged this interaction for the following reasons:
+${data.summary}
+${data.severity_explanation || ''}
+
+ORIGINAL MESSAGE/EVIDENCE:
+"${originalText}"
+
+Please investigate this matter.`;
+
+      document.getElementById('reportTemplateText').value = template;
+      document.getElementById('reportModal').style.display = 'flex';
+    };
+
+    window.closeReportModal = function() {
+      document.getElementById('reportModal').style.display = 'none';
+    };
+
+    window.copyAndGoToPortal = function() {
+      const text = document.getElementById('reportTemplateText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        window.open('https://cybercrime.gov.in', '_blank');
+        closeReportModal();
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text. Please copy it manually.');
+      });
+    };
+
+    window.copyReport = function(type) {
+      if (!currentAnalysis) return;
+      const res = currentAnalysis.result;
+      const text = `Feminary AI Analysis Report\nRisk Level: ${res.risk}\nSummary: ${res.summary}\nTactics: ${(res.tactics||[]).join(', ')}\n\nAnalyzed Text:\n"${currentAnalysis.text}"`;
+      navigator.clipboard.writeText(text).then(() => alert('Report copied to clipboard.'));
+    };
+  </script>
+</body>
+</html>
